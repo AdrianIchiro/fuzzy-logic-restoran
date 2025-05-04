@@ -60,3 +60,31 @@ def defuzzifikasi(output):
     bawah = sum(output[label] for label in output)
     return atas / bawah if bawah != 0 else 0
 
+df = pd.read_excel("restoran.xlsx")
+
+hasil = []
+
+for index, row in df.iterrows():
+    pelayanan = row['Pelayanan']
+    harga = row['harga']
+    id_pelanggan = row['id Pelanggan']
+    
+    fuzzy_pelayanan = fuzzify_pelayanan(pelayanan)
+    fuzzy_harga = fuzzify_harga(harga)
+    hasil_inferensi = inferensi(fuzzy_pelayanan, fuzzy_harga)
+    skor = defuzzifikasi(hasil_inferensi)
+
+    hasil.append({
+        'ID Restoran': id_pelanggan,
+        'Pelayanan': pelayanan,
+        'Harga': harga,
+        'Skor Kelayakan': round(skor, 2)
+    })
+
+# ambil 5 yang terbaik
+
+peringkat = sorted(hasil, key=lambda x: x['Skor Kelayakan'], reverse=True)[:5]
+peringkat_df = pd.DataFrame(peringkat)
+peringkat_df.to_excel("peringkat.xlsx", index=False)
+
+print(peringkat_df)
